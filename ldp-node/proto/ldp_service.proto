@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package ldp;
+
+service LLMPipelineService {
+  rpc ForwardActivationStream (stream ActivationPayload) returns (ForwardResponse);
+}
+
+message ActivationPayload {
+  int64 token_index = 1;
+  repeated float tensor_data = 2;
+  repeated int32 tensor_shape = 3;
+  int32 target_next_layer = 4;
+}
+
+message ForwardResponse {
+  bool status_success = 1;
+  string error_message = 2;
+}
