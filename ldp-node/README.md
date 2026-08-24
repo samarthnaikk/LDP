@@ -2,6 +2,8 @@
 
 This project contains a Python and gRPC Minimum Viable Product for the LLM Direct Protocol transport layer. It streams a mock activation payload one-way from a master node to a worker node over HTTP/2, serializes payloads with Protocol Buffers, and decouples network reception from execution with a thread-safe queue.
 
+For a step-by-step runbook, see [`docs/USAGE.md`](./docs/USAGE.md).
+
 ## Directory Layout
 
 ```text
@@ -75,6 +77,14 @@ Environment variables:
 - `LDP_RECEIVER_PORT` defaults to `50051`
 - `LDP_TRANSMITTER_HOST` defaults to `127.0.0.1`
 - `LDP_TRANSMITTER_PORT` defaults to `50051`
+
+## What You Should See
+
+When the receiver is running and the transmitter sends the payload:
+
+- the receiver logs that it queued an activation payload
+- the transmitter logs `status_success=True`
+- the stream completes with a positive `ForwardResponse`
 
 ## Tests
 

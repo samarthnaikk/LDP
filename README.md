@@ -1,55 +1,55 @@
-# LLM Direct Protocol (LDP) - Transport Foundation
+# LLM Direct Protocol (LDP)
 
-This repository establishes the foundational transport layer and interface boundaries for the LLM Direct Protocol (LDP). The current implementation strictly focuses on the peer-to-peer communication protocol, enabling two different systems to seamlessly stream data without the overhead of model splitting or inference engines.
+This repository contains a transport-layer MVP for the LLM Direct Protocol. The implementation lives under [`ldp-node/`](./ldp-node) and focuses only on point-to-point delivery of a mock activation payload from a Master node to a Worker node.
 
-## Protocol Interface
+## What It Does
 
-The communication boundary between nodes is defined via Protocol Buffers to ensure highly optimized binary serialization.
+- uses gRPC over HTTP/2 for a persistent streaming connection
+- uses Protocol Buffers for binary serialization
+- receives payloads asynchronously and places them onto a thread-safe queue
+- supports local execution and Docker Compose orchestration
 
-* **Definition File:** `ldp_service.proto` defines the structural messaging format and interface boundaries.
+## Project Layout
 
+- [`ldp-node/proto/ldp_service.proto`](./ldp-node/proto/ldp_service.proto): gRPC service and message contract
+- [`ldp-node/src/network/receiver.py`](./ldp-node/src/network/receiver.py): Worker-side gRPC receiver
+- [`ldp-node/src/network/transmitter.py`](./ldp-node/src/network/transmitter.py): Master-side transmitter
+- [`ldp-node/src/network/queue.py`](./ldp-node/src/network/queue.py): shared in-memory queue
+- [`ldp-node/docker-compose.yml`](./ldp-node/docker-compose.yml): two-container demo
 
-* **Core Service:** `LLMPipelineService` handles the sequential execution chain via the `ForwardActivationStream` RPC.
+## Quick Start
 
+```bash
+cd ldp-node
+python3.11 -m venv .venv
+./.venv/bin/pip install -r requirements.txt
+PYTHON_BIN=./.venv/bin/python ./scripts/compile_proto.sh
+```
 
-* **Activation Payload:** Transmits the `token_index`, 5120-dimension `tensor_data` array, `tensor_shape`, and `target_next_layer` offset verification.
+Start the receiver:
 
+```bash
+cd ldp-node
+PYTHONPATH=src ./.venv/bin/python src/node.py receiver
+```
 
-* **Forward Response:** Returns a `status_success` boolean alongside an `error_message` string for stack diagnostics if processing fails.
+In another terminal, send the mock payload:
 
+```bash
+cd ldp-node
+PYTHONPATH=src ./.venv/bin/python src/node.py transmitter
+```
 
+## Full Usage Docs
 
-## Transport Architecture
+- Repo-level overview: [`ldp-node/README.md`](./ldp-node/README.md)
+- Step-by-step usage guide: [`ldp-node/docs/USAGE.md`](./ldp-node/docs/USAGE.md)
 
-The network layer completely discards custom message queues or raw sockets in favor of gRPC operating over an HTTP/2 transport layer.
+## Verification
 
-* **Persistent Streams:** Communication relies on a single long-lived, multiplexed TCP connection between consecutive nodes to bypass repeated socket handshake overhead.
+Run the test suite with:
 
-
-* **Unidirectional Flow:** Data moves strictly in a linear direction from a transmitter to a receiver.
-
-
-* **Asynchronous Decoupling:** Network reception is explicitly separated from active compute threads to prevent blocking during data transfer.
-
-
-
-## Implementation Components
-
-To establish a usable connection between two distinct systems, the following architectural components must be implemented on each instance:
-
-* **Network Receiver:** A gRPC server buffer that accepts incoming activation payloads.
-
-
-* **Thread-Safe Queue:** An asynchronous holding structure where the receiver safely pushes incoming payloads.
-
-
-* **Client Transmitter:** A gRPC client that pushes the forward payload to the next node in the pipeline.
-
-
-* **Loopback Channel:** A lightweight backchannel that returns the final predicted token ID to the master head node.
-
-
-
-## Testing the Connection
-
-Before integrating the computation core, validate the transport layer by generating a dummy 20.48 KB float array, which represents the strict deterministic payload size of a single token evaluation. Stream this payload from System 1 to System 2 to confirm that the pipeline successfully routes the data and triggers a successful response.
+```bash
+cd ldp-node
+PYTHONPATH=src ./.venv/bin/pytest
+```
