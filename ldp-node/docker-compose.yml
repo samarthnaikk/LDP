@@ -1,0 +1,20 @@
+services:
+  worker:
+    build:
+      context: .
+    command: ["python", "src/node.py", "receiver"]
+    environment:
+      LDP_RECEIVER_HOST: "0.0.0.0"
+      LDP_RECEIVER_PORT: "50051"
+    ports:
+      - "50051:50051"
+
+  master:
+    build:
+      context: .
+    command: ["sh", "-c", "sleep 2 && python src/node.py transmitter"]
+    environment:
+      LDP_TRANSMITTER_HOST: "worker"
+      LDP_TRANSMITTER_PORT: "50051"
+    depends_on:
+      - worker
