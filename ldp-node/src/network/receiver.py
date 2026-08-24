@@ -37,10 +37,15 @@ class LLMPipelineReceiver(ldp_service_pb2_grpc.LLMPipelineServiceServicer):
         )
 
 
-def serve() -> None:
-    settings = get_settings()
+def create_server() -> grpc.Server:
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
     ldp_service_pb2_grpc.add_LLMPipelineServiceServicer_to_server(LLMPipelineReceiver(), server)
+    return server
+
+
+def serve() -> None:
+    settings = get_settings()
+    server = create_server()
     server.add_insecure_port(settings.receiver_address)
     server.start()
     LOGGER.info("Receiver listening on %s", settings.receiver_address)
