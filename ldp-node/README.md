@@ -126,3 +126,18 @@ Run the receiver and transmitter as separate processes and verify their logs:
 ```
 
 This starts `src/receive.py` in the background, runs `src/transmit.py` against it on `127.0.0.1:50071`, and checks that the payload was both queued and acknowledged.
+
+## HTTP vs LDP Benchmark
+
+To compare large matrix transfer times over plain HTTP and LDP locally:
+
+```bash
+PYTHONPATH=src ./.venv311/bin/python scripts/benchmark_http_vs_ldp.py --matrix-count 24 --rows 256 --cols 256
+```
+
+This sends the same matrix workload through:
+
+- plain HTTP with JSON payloads
+- LDP over gRPC with protobuf payloads
+
+and prints the end-to-end duration and transmitted byte size for each path.

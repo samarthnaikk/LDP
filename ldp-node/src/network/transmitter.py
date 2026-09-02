@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Iterable
+from collections.abc import Iterable, Sequence
 
 import grpc
 
@@ -27,18 +27,22 @@ def build_mock_payloads() -> Iterable[ldp_service_pb2.ActivationPayload]:
     )
 
 
-def transmit_mock_activation() -> ldp_service_pb2.ForwardResponse:
+def transmit_payloads(
+    payloads: Sequence[ldp_service_pb2.ActivationPayload] | Iterable[ldp_service_pb2.ActivationPayload],
+    target: str | None = None,
+) -> ldp_service_pb2.ForwardResponse:
     settings = get_settings()
-    payloads = list(build_mock_payloads())
+    payload_list = list(payloads)
+    transmitter_target = target or settings.transmitter_target
     LOGGER.info(
         "Connecting to worker at %s to send %s activation payload(s)",
-        settings.transmitter_target,
-        len(payloads),
+        transmitter_target,
+        len(payload_list),
     )
 
-    with grpc.insecure_channel(settings.transmitter_target) as channel:
+    with grpc.insecure_channel(transmitter_target) as channel:
         stub = ldp_service_pb2_grpc.LLMPipelineServiceStub(channel)
-        response = stub.ForwardActivationStream(iter(payloads))
+        response = stub.ForwardActivationStream(iter(payload_list))
 
     LOGGER.info(
         "Receiver response status_success=%s error_message=%r",
@@ -46,6 +50,10 @@ def transmit_mock_activation() -> ldp_service_pb2.ForwardResponse:
         response.error_message,
     )
     return response
+
+
+def transmit_mock_activation() -> ldp_service_pb2.ForwardResponse:
+    return transmit_payloads(build_mock_payloads())
 
 
 if __name__ == "__main__":

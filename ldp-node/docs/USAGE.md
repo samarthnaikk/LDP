@@ -137,6 +137,22 @@ The script:
 - runs `src/transmit.py` in the foreground against that port
 - verifies receiver and transmitter log markers under `logs/smoke/`
 
+## Benchmarking HTTP vs LDP
+
+To measure larger matrix transfers over both transports:
+
+```bash
+cd ldp-node
+PYTHONPATH=src ./.venv311/bin/python scripts/benchmark_http_vs_ldp.py --matrix-count 24 --rows 256 --cols 256
+```
+
+You can increase the workload, for example:
+
+```bash
+PYTHONPATH=src ./.venv311/bin/python scripts/benchmark_http_vs_ldp.py --matrix-count 32 --rows 256 --cols 256
+PYTHONPATH=src ./.venv311/bin/python scripts/benchmark_http_vs_ldp.py --matrix-count 12 --rows 512 --cols 512
+```
+
 ## Troubleshooting
 
 If proto imports fail:
