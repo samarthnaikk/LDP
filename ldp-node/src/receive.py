@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import logging
-
+from logging_utils import configure_logging
 from network.receiver import serve
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    configure_logging("receiver")
     serve()
 
 

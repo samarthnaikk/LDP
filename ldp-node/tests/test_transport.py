@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import logging
 import os
 import socket
 import threading
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from generated import ldp_service_pb2
+from logging_utils import configure_logging
 from receive import main as receive_main
 from network.queue import clear_queue, get_queue
 from network.receiver import LLMPipelineReceiver, create_server
@@ -115,3 +118,13 @@ def test_transmit_entrypoint_calls_transmit_mock_activation():
         transmit_main()
 
     transmit_mock.assert_called_once_with()
+
+
+def test_configure_logging_creates_role_log_file(tmp_path: Path):
+    with patch.dict(os.environ, {"LDP_LOG_DIR": str(tmp_path)}, clear=False):
+        log_path = configure_logging("receiver")
+        logging.getLogger("test").info("receiver log smoke")
+
+    assert log_path == tmp_path / "receiver.log"
+    assert log_path.exists()
+    assert "receiver log smoke" in log_path.read_text()

@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import logging
-
+from logging_utils import configure_logging
 from network.transmitter import transmit_mock_activation
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    configure_logging("transmitter")
     transmit_mock_activation()
 
 
