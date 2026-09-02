@@ -29,11 +29,16 @@ def build_mock_payloads() -> Iterable[ldp_service_pb2.ActivationPayload]:
 
 def transmit_mock_activation() -> ldp_service_pb2.ForwardResponse:
     settings = get_settings()
-    LOGGER.info("Connecting to worker at %s", settings.transmitter_target)
+    payloads = list(build_mock_payloads())
+    LOGGER.info(
+        "Connecting to worker at %s to send %s activation payload(s)",
+        settings.transmitter_target,
+        len(payloads),
+    )
 
     with grpc.insecure_channel(settings.transmitter_target) as channel:
         stub = ldp_service_pb2_grpc.LLMPipelineServiceStub(channel)
-        response = stub.ForwardActivationStream(build_mock_payloads())
+        response = stub.ForwardActivationStream(iter(payloads))
 
     LOGGER.info(
         "Receiver response status_success=%s error_message=%r",

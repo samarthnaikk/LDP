@@ -3,12 +3,15 @@ from __future__ import annotations
 import os
 import socket
 import threading
+from unittest.mock import patch
 
 import pytest
 
 from generated import ldp_service_pb2
+from receive import main as receive_main
 from network.queue import clear_queue, get_queue
 from network.receiver import LLMPipelineReceiver, create_server
+from transmit import main as transmit_main
 from network.transmitter import build_mock_payloads, transmit_mock_activation
 
 
@@ -98,3 +101,17 @@ def test_transmitter_and_receiver_integrate_over_grpc():
         os.environ.pop("LDP_TRANSMITTER_HOST", None)
         os.environ.pop("LDP_TRANSMITTER_PORT", None)
         clear_queue()
+
+
+def test_receive_entrypoint_calls_serve():
+    with patch("receive.serve") as serve_mock:
+        receive_main()
+
+    serve_mock.assert_called_once_with()
+
+
+def test_transmit_entrypoint_calls_transmit_mock_activation():
+    with patch("transmit.transmit_mock_activation") as transmit_mock:
+        transmit_main()
+
+    transmit_mock.assert_called_once_with()

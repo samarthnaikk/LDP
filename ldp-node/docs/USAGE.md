@@ -59,7 +59,7 @@ Start the Worker receiver in one terminal:
 
 ```bash
 cd ldp-node
-PYTHONPATH=src ./.venv/bin/python src/node.py receiver
+PYTHONPATH=src ./.venv/bin/python src/receive.py
 ```
 
 Expected behavior:
@@ -71,7 +71,7 @@ Start the Master transmitter in a second terminal:
 
 ```bash
 cd ldp-node
-PYTHONPATH=src ./.venv/bin/python src/node.py transmitter
+PYTHONPATH=src ./.venv/bin/python src/transmit.py
 ```
 
 Expected behavior:
@@ -79,6 +79,13 @@ Expected behavior:
 - the transmitter connects to the configured Worker target
 - it sends a deterministic mock payload representing a tiny activation tensor
 - it logs the `status_success` response from the Worker
+
+If you need the older single-file wrapper, `src/node.py` still supports:
+
+```bash
+PYTHONPATH=src ./.venv/bin/python src/node.py receiver
+PYTHONPATH=src ./.venv/bin/python src/node.py transmitter
+```
 
 ## Running with Docker Compose
 

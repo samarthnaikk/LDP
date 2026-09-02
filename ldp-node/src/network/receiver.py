@@ -9,7 +9,7 @@ import grpc
 
 from config.settings import get_settings
 from generated import ldp_service_pb2, ldp_service_pb2_grpc
-from network.queue import enqueue_payload
+from network.queue import enqueue_payload, get_queue
 
 
 LOGGER = logging.getLogger(__name__)
@@ -46,9 +46,15 @@ def create_server() -> grpc.Server:
 def serve() -> None:
     settings = get_settings()
     server = create_server()
-    server.add_insecure_port(settings.receiver_address)
+    bound_port = server.add_insecure_port(settings.receiver_address)
+    if bound_port == 0:
+        raise RuntimeError(f"Receiver could not bind to {settings.receiver_address}.")
     server.start()
-    LOGGER.info("Receiver listening on %s", settings.receiver_address)
+    LOGGER.info(
+        "Receiver listening on %s with queue_id=%s",
+        settings.receiver_address,
+        id(get_queue()),
+    )
     server.wait_for_termination()
 
 

@@ -62,12 +62,19 @@ The script generates `ldp_service_pb2.py` and `ldp_service_pb2_grpc.py` in `src/
 Start the worker receiver:
 
 ```bash
-PYTHONPATH=src ./.venv/bin/python src/node.py receiver
+PYTHONPATH=src ./.venv/bin/python src/receive.py
 ```
 
 In a second terminal, send the mock activation stream from the master transmitter:
 
 ```bash
+PYTHONPATH=src ./.venv/bin/python src/transmit.py
+```
+
+The legacy shared entrypoint still works if you need role-based invocation:
+
+```bash
+PYTHONPATH=src ./.venv/bin/python src/node.py receiver
 PYTHONPATH=src ./.venv/bin/python src/node.py transmitter
 ```
 
