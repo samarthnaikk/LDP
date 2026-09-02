@@ -122,6 +122,21 @@ The suite covers:
 - high-frequency queue drops using `pytest-timeout`
 - a live gRPC integration test when the environment allows local socket binding
 
+## One-Command Local Verification
+
+To launch both dedicated files on separate processes and confirm transfer via logs:
+
+```bash
+cd ldp-node
+./scripts/run_local_smoke.sh
+```
+
+The script:
+
+- starts `src/receive.py` in the background on `127.0.0.1:50071`
+- runs `src/transmit.py` in the foreground against that port
+- verifies receiver and transmitter log markers under `logs/smoke/`
+
 ## Troubleshooting
 
 If proto imports fail:

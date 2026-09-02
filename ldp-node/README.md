@@ -116,3 +116,13 @@ docker compose up --build
 ```
 
 The `worker` service starts the receiver, and the `master` service waits briefly before transmitting the mock activation payload to `worker:50051` over the internal Compose network.
+
+## Local Smoke Check
+
+Run the receiver and transmitter as separate processes and verify their logs:
+
+```bash
+./scripts/run_local_smoke.sh
+```
+
+This starts `src/receive.py` in the background, runs `src/transmit.py` against it on `127.0.0.1:50071`, and checks that the payload was both queued and acknowledged.
